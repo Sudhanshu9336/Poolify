@@ -622,32 +622,21 @@ function joinPool(poolId) {
 // View pool function - MODIFIED WITH MULTIPLE PATH OPTIONS
 function viewPool(poolId){
     console.log("Viewing pool:", poolId);
-    
-    // Save the pool ID to localStorage
     localStorage.setItem('current_viewing_pool', poolId);
     
-    // Try multiple path options
-    const paths = [
-        'pool-details.html',
-        './pool-details.html',
-        '/pool-details.html',
-        'public/pool-details.html',
-        '/public/pool-details.html'
-    ];
+    // Check current URL
+    const currentUrl = window.location.href;
     
-    // Try each path
-    for (let path of paths) {
-        console.log("Trying path:", path);
-        try {
-            window.location.href = path;
-            return;
-        } catch (e) {
-            console.log("Failed with path:", path);
-        }
+    if (currentUrl.includes('github.io')) {
+        // GitHub Pages - use relative path from public folder
+        window.location.href = 'pool-details.html';
+    } else if (currentUrl.includes('localhost')) {
+        // Local development
+        window.location.href = 'pool-details.html';
+    } else {
+        // Fallback
+        window.location.href = 'pool-details.html';
     }
-    
-    // If all paths fail, show alert
-    alert(`Pool Details:\nPool ID: ${poolId}\n(Page not found - check file location)`);
 }
 // ==================== CHAT FUNCTIONS ====================
 function openChat(poolId) {
