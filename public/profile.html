@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Poolify</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="../js/firebase-config.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0 auto 20px;
+            border: 5px solid white;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .profile-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .profile-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .profile-card p {
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+        
+        .profile-card strong {
+            color: var(--dark);
+        }
+        
+        .edit-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 15px;
+        }
+        
+        .edit-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: var(--light);
+            border-radius: var(--radius);
+        }
+        
+        .stat-number {
+            display: block;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 8px;
+        }
+        
+        .preferences {
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .pref-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .pref-item:last-child {
+            border-bottom: none;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-brand">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Dashboard</span>
+            </a>
+            <div class="nav-links">
+                <button onclick="logout()" class="btn-login">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">U</div>
+            <h1 id="profileName">Loading...</h1>
+            <p id="profileEmail" style="color: var(--gray);">email@example.com</p>
+            <button onclick="editProfile()" class="btn-primary" style="margin-top: 15px;">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+        </div>
+        
+        <div class="profile-cards">
+            <div class="profile-card">
+                <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                <p><strong>Full Name:</strong> <span id="fullName">Loading...</span></p>
+                <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                <p><strong>Phone:</strong> <span id="phoneNumber">Not set</span></p>
+                <p><strong>Hostel:</strong> <span id="userHostel">Not set</span></p>
+                <button onclick="editBasicInfo()" class="edit-btn">
+                    <i class="fas fa-pencil-alt"></i> Edit
+                </button>
+            </div>
+            
+            <div class="profile-card">
+                <h3><i class="fas fa-map-marker-alt"></i> Delivery Address</h3>
+                <p id="deliveryAddress">Hostel B, Room 205, Delhi University</p>
+                <p><strong>Default Platform:</strong> Blinkit</p>
+                <p><strong>Delivery Time:</strong> Usually 7-10 PM</p>
+                <button onclick="editAddress()" class="edit-btn">
+                    <i class="fas fa-pencil-alt"></i> Edit Address
+                </button>
+            </div>
+        </div>
+        
+        <div class="preferences">
+            <h2><i class="fas fa-cog"></i> Preferences</h2>
+            <div class="pref-item">
+                <div>
+                    <strong>Email Notifications</strong>
+                    <p style="font-size: 0.9rem; color: var(--gray);">Get updates about new pools</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="pref-item">
+                <div>
+                    <strong>Push Notifications</strong>
+                    <p style="font-size: 0.9rem; color: var(--gray);">Pool reminders and updates</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="pref-item">
+                <div>
+                    <strong>Show My Location</strong>
+                    <p style="font-size: 0.9rem; color: var(--gray);">Let others see your hostel</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="pref-item">
+                <div>
+                    <strong>Auto-Join Pools</strong>
+                    <p style="font-size: 0.9rem; color: var(--gray);">Join pools matching your preferences</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <h2><i class="fas fa-chart-line"></i> Your Poolify Stats</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number" id="poolsCreated">0</span>
+                    <span class="stat-label">Pools Created</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="poolsJoined">0</span>
+                    <span class="stat-label">Pools Joined</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">₹<span id="moneySaved">0</span></span>
+                    <span class="stat-label">Total Saved</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="itemsPooled">0</span>
+                    <span class="stat-label">Items Pooled</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; text-align: center;">
+            <button onclick="deleteAccount()" class="btn-secondary" style="background: var(--danger); color: white;">
+                <i class="fas fa-trash-alt"></i> Delete Account
+            </button>
+            <p style="color: var(--gray); font-size: 0.9rem; margin-top: 10px;">
+                This will permanently delete your account and all your data.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Load user profile data
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = localStorage.getItem('poolify_user');
+            
+            if (!userData) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const user = JSON.parse(userData);
+            
+            // Update profile information
+            document.getElementById('profileName').textContent = user.name || user.email.split('@')[0];
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('profileAvatar').textContent = (user.name || 'U').charAt(0).toUpperCase();
+            
+            document.getElementById('fullName').textContent = user.name || 'Not set';
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('phoneNumber').textContent = user.phone || 'Not set';
+            document.getElementById('userHostel').textContent = user.hostel || 'Not set';
+            
+            // Load stats
+            const stats = JSON.parse(localStorage.getItem('poolify_user_stats') || '{}');
+            document.getElementById('poolsCreated').textContent = stats.poolsCreated || 0;
+            document.getElementById('poolsJoined').textContent = stats.poolsJoined || 0;
+            document.getElementById('moneySaved').textContent = stats.moneySaved || 0;
+            document.getElementById('itemsPooled').textContent = stats.itemsPooled || 0;
+        });
+        
+        function editProfile() {
+            const newName = prompt('Enter your full name:', document.getElementById('fullName').textContent);
+            if (newName) {
+                document.getElementById('fullName').textContent = newName;
+                document.getElementById('profileName').textContent = newName;
+                document.getElementById('profileAvatar').textContent = newName.charAt(0).toUpperCase();
+                
+                // Update localStorage
+                const user = JSON.parse(localStorage.getItem('poolify_user'));
+                user.name = newName;
+                localStorage.setItem('poolify_user', JSON.stringify(user));
+                
+                alert('Profile updated successfully!');
+            }
+        }
+        
+        function editBasicInfo() {
+            const currentUser = JSON.parse(localStorage.getItem('poolify_user'));
+            
+            const newName = prompt('Enter your full name:', currentUser.name || '');
+            const newPhone = prompt('Enter your phone number:', currentUser.phone || '');
+            const newHostel = prompt('Enter your hostel:', currentUser.hostel || '');
+            
+            if (newName) {
+                currentUser.name = newName;
+                currentUser.phone = newPhone;
+                currentUser.hostel = newHostel;
+                
+                localStorage.setItem('poolify_user', JSON.stringify(currentUser));
+                
+                // Update UI
+                document.getElementById('fullName').textContent = newName;
+                document.getElementById('profileName').textContent = newName;
+                document.getElementById('profileAvatar').textContent = newName.charAt(0).toUpperCase();
+                document.getElementById('phoneNumber').textContent = newPhone || 'Not set';
+                document.getElementById('userHostel').textContent = newHostel || 'Not set';
+                
+                alert('Basic information updated!');
+            }
+        }
+        
+        function editAddress() {
+            const newAddress = prompt('Enter your delivery address:', document.getElementById('deliveryAddress').textContent);
+            if (newAddress) {
+                document.getElementById('deliveryAddress').textContent = newAddress;
+                alert('Delivery address updated!');
+            }
+        }
+        
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                if (confirm('This will delete ALL your data including pools and chats. Are you absolutely sure?')) {
+                    // Clear all user data
+                    localStorage.clear();
+                    alert('Account deleted successfully. Redirecting to home page...');
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+        
+        window.editProfile = editProfile;
+        window.editBasicInfo = editBasicInfo;
+        window.editAddress = editAddress;
+        window.deleteAccount = deleteAccount;
+        window.logout = logout;
+    </script>
+</body>
+</html>

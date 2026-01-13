@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Poolify</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="../js/firebase-config.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Login Form -->
+            <div id="loginFormContainer">
+                <div class="login-header">
+                    <h2>Welcome Back!</h2>
+                    <p>Login to your Poolify account</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" id="loginEmail" class="form-control" 
+                               placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" id="loginPassword" class="form-control" 
+                               placeholder="Enter your password" required>
+                    </div>
+                    
+                    <div class="login-actions">
+                        <div class="remember-me">
+                            <input type="checkbox" id="rememberMe">
+                            <label for="rememberMe">Remember me</label>
+                        </div>
+                        <a href="#" class="forgot-password">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="width: 100%;">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                
+                <div class="divider">
+                    or continue with
+                </div>
+                
+                <div class="social-login">
+                    <button type="button" class="btn-google">
+                        <i class="fab fa-google"></i>
+                        Continue with Google
+                    </button>
+                    <button type="button" class="btn-facebook">
+                        <i class="fab fa-facebook"></i>
+                        Continue with Facebook
+                    </button>
+                </div>
+                
+                <div class="login-footer">
+                    Don't have an account? 
+                    <a href="#" onclick="showSignupForm()">Sign up here</a>
+                </div>
+            </div>
+            
+            <!-- Signup Form (Hidden Initially) -->
+            <div id="signupFormContainer" style="display: none;">
+                <div class="login-header">
+                    <h2>Join Poolify</h2>
+                    <p>Create your free account</p>
+                </div>
+                
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="signupName">
+                            <i class="fas fa-user"></i> Full Name
+                        </label>
+                        <input type="text" id="signupName" class="form-control" 
+                               placeholder="Enter your name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupEmail">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" id="signupEmail" class="form-control" 
+                               placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupHostel">
+                            <i class="fas fa-building"></i> Hostel/Apartment
+                        </label>
+                        <input type="text" id="signupHostel" class="form-control" 
+                               placeholder="e.g., Hostel B, Apartment XYZ" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupRoom">
+                            <i class="fas fa-door-closed"></i> Room Number (Optional)
+                        </label>
+                        <input type="text" id="signupRoom" class="form-control" 
+                               placeholder="e.g., 205, Block A">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupPassword">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" id="signupPassword" class="form-control" 
+                               placeholder="Create a password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-lock"></i> Confirm Password
+                        </label>
+                        <input type="password" id="confirmPassword" class="form-control" 
+                               placeholder="Confirm your password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" required>
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="width: 100%;">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+                
+                <div class="login-footer">
+                    Already have an account? 
+                    <a href="#" onclick="showLoginForm()">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/Hide Forms
+        function showSignupForm() {
+            document.getElementById('loginFormContainer').style.display = 'none';
+            document.getElementById('signupFormContainer').style.display = 'block';
+            window.location.hash = 'signup';
+        }
+        
+        function showLoginForm() {
+            document.getElementById('signupFormContainer').style.display = 'none';
+            document.getElementById('loginFormContainer').style.display = 'block';
+            window.location.hash = '';
+        }
+        
+        // Check URL hash on load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash === '#signup') {
+                showSignupForm();
+            }
+        });
+        
+        // Simple form validation and demo login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Demo validation
+            if (!email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Demo user data
+                const userData = {
+                    uid: 'demo-user-' + Date.now(),
+                    name: email.split('@')[0],
+                    email: email,
+                    hostel: 'Hostel B',
+                    room: '205'
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('poolify_user', JSON.stringify(userData));
+                
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        });
+        
+        // Signup form
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const hostel = document.getElementById('signupHostel').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (!name || !email || !hostel || !password) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+            
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Demo user data
+                const userData = {
+                    uid: 'new-user-' + Date.now(),
+                    name: name,
+                    email: email,
+                    hostel: hostel,
+                    room: document.getElementById('signupRoom').value || '',
+                    joinedDate: new Date().toISOString()
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('poolify_user', JSON.stringify(userData));
+                
+                // Redirect to dashboard
+                alert('Account created successfully!');
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        });
+        
+        // Social login buttons
+        document.querySelector('.btn-google').addEventListener('click', function() {
+            alert('Google login would be implemented here');
+        });
+        
+        document.querySelector('.btn-facebook').addEventListener('click', function() {
+            alert('Facebook login would be implemented here');
+        });
+    </script>
+</body>
+</html>

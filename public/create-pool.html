@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Pool - Poolify</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="../js/firebase-config.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-brand">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Dashboard</span>
+            </a>
+            <div class="nav-links">
+                <span id="userEmail"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+        <div class="create-pool-header">
+            <h1><i class="fas fa-plus-circle"></i> Create New Pool</h1>
+            <p>Start pooling orders with your neighbors to save on delivery</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step active">
+                <div class="step-number">1</div>
+                <div class="step-label">Select Platform</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-label">Add Items</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-label">Set Details</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-label">Review & Create</div>
+            </div>
+        </div>
+
+        <!-- Step 1: Select Platform -->
+        <div id="step1" class="step-content active">
+            <h2>Select Delivery Platform</h2>
+            <p class="step-description">Choose where you want to order from</p>
+            
+            <div class="platform-options">
+                <div class="platform-card" onclick="selectPlatform('blinkit')">
+                    <div class="platform-icon" style="background: #F8B400;">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Blinkit</h3>
+                    <p>10-15 min delivery</p>
+                    <div class="platform-tags">
+                        <span class="tag">Grocery</span>
+                        <span class="tag">Snacks</span>
+                        <span class="tag">Essentials</span>
+                    </div>
+                </div>
+                
+                <div class="platform-card" onclick="selectPlatform('zepto')">
+                    <div class="platform-icon" style="background: #FF6B6B;">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Zepto</h3>
+                    <p>10 min delivery</p>
+                    <div class="platform-tags">
+                        <span class="tag">Quick</span>
+                        <span class="tag">Fresh</span>
+                        <span class="tag">24x7</span>
+                    </div>
+                </div>
+                
+                <div class="platform-card" onclick="selectPlatform('instamart')">
+                    <div class="platform-icon" style="background: #4ECDC4;">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3>Instamart</h3>
+                    <p>15-20 min delivery</p>
+                    <div class="platform-tags">
+                        <span class="tag">Swiggy</span>
+                        <span class="tag">Wide Range</span>
+                    </div>
+                </div>
+                
+                <div class="platform-card" onclick="selectPlatform('flipkart')">
+                    <div class="platform-icon" style="background: #2874F0;">
+                        <i class="fab fa-flipkart"></i>
+                    </div>
+                    <h3>Flipkart Minutes</h3>
+                    <p>15-20 min delivery</p>
+                    <div class="platform-tags">
+                        <span class="tag">Electronics</span>
+                        <span class="tag">Home</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-buttons">
+                <button onclick="nextStep()" class="btn-primary" id="nextBtn1" disabled>
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Add Items -->
+        <div id="step2" class="step-content">
+            <h2>What do you need?</h2>
+            <p class="step-description">Add items you want to order</p>
+            
+            <div class="items-container">
+                <div class="item-input-group">
+                    <input type="text" id="itemInput" placeholder="e.g., Milk, Bread, Eggs, Chips..." 
+                           onkeypress="handleItemKeyPress(event)">
+                    <button onclick="addItem()" class="btn-secondary">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+                
+                <div class="suggestions">
+                    <p>Quick add:</p>
+                    <div class="suggestion-tags">
+                        <span onclick="addQuickItem('Milk')">Milk</span>
+                        <span onclick="addQuickItem('Bread')">Bread</span>
+                        <span onclick="addQuickItem('Eggs')">Eggs</span>
+                        <span onclick="addQuickItem('Chips')">Chips</span>
+                        <span onclick="addQuickItem('Biscuits')">Biscuits</span>
+                        <span onclick="addQuickItem('Cold Drinks')">Cold Drinks</span>
+                        <span onclick="addQuickItem('Maggi')">Maggi</span>
+                        <span onclick="addQuickItem('Fruits')">Fruits</span>
+                    </div>
+                </div>
+                
+                <div class="items-list" id="itemsList">
+                    <p style="text-align: center; color: var(--gray); padding: 40px;">
+                        No items added yet. Start typing above or click quick suggestions.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="step-buttons">
+                <button onclick="prevStep()" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button onclick="nextStep()" class="btn-primary" id="nextBtn2" disabled>
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Set Details -->
+        <div id="step3" class="step-content">
+            <h2>Pool Details</h2>
+            <p class="step-description">Set the rules for your pool</p>
+            
+            <div class="details-form">
+                <div class="form-group">
+                    <label for="timeLimit">
+                        <i class="fas fa-clock"></i> Pool Time Limit
+                    </label>
+                    <select id="timeLimit" class="form-control">
+                        <option value="10">10 minutes (Quick Pool)</option>
+                        <option value="15" selected>15 minutes (Recommended)</option>
+                        <option value="20">20 minutes (Standard)</option>
+                        <option value="30">30 minutes (Relaxed)</option>
+                    </select>
+                    <small>How long people can join your pool</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxUsers">
+                        <i class="fas fa-users"></i> Maximum Users
+                    </label>
+                    <select id="maxUsers" class="form-control">
+                        <option value="2">2 users (You + 1)</option>
+                        <option value="3" selected>3 users (You + 2)</option>
+                        <option value="4">4 users (You + 3)</option>
+                        <option value="5">5 users (You + 4)</option>
+                    </select>
+                    <small>Maximum people who can join this pool</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">
+                        <i class="fas fa-sticky-note"></i> Notes (Optional)
+                    </label>
+                    <textarea id="notes" class="form-control" rows="3" 
+                              placeholder="Any special instructions? e.g., 'Need sugar urgently', 'Prefer cash payment', etc."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">
+                        <i class="fas fa-map-marker-alt"></i> Delivery Location
+                    </label>
+                    <input type="text" id="location" class="form-control" 
+                           placeholder="e.g., Hostel B Gate, Room 205, etc.">
+                    <small>Where should the delivery come?</small>
+                </div>
+            </div>
+            
+            <div class="step-buttons">
+                <button onclick="prevStep()" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button onclick="nextStep()" class="btn-primary">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Review -->
+        <div id="step4" class="step-content">
+            <h2>Review Your Pool</h2>
+            <p class="step-description">Double-check before creating</p>
+            
+            <div class="review-card">
+                <div class="review-header">
+                    <div id="reviewPlatformIcon" class="platform-icon-small"></div>
+                    <h3 id="reviewPlatformName">Platform</h3>
+                </div>
+                
+                <div class="review-section">
+                    <h4><i class="fas fa-shopping-basket"></i> Items</h4>
+                    <div id="reviewItems" class="review-content">
+                        Loading items...
+                    </div>
+                </div>
+                
+                <div class="review-section">
+                    <h4><i class="fas fa-cog"></i> Settings</h4>
+                    <div class="review-content">
+                        <div class="review-row">
+                            <span>Time Limit:</span>
+                            <strong id="reviewTimeLimit">15 minutes</strong>
+                        </div>
+                        <div class="review-row">
+                            <span>Max Users:</span>
+                            <strong id="reviewMaxUsers">3 users</strong>
+                        </div>
+                        <div class="review-row">
+                            <span>Delivery Location:</span>
+                            <strong id="reviewLocation">Not set</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-section" id="notesSection" style="display: none;">
+                    <h4><i class="fas fa-sticky-note"></i> Notes</h4>
+                    <div id="reviewNotes" class="review-content">
+                        No notes added
+                    </div>
+                </div>
+                
+                <div class="review-section">
+                    <h4><i class="fas fa-calculator"></i> Estimated Savings</h4>
+                    <div class="review-content">
+                        <div class="savings-display">
+                            <div class="savings-item">
+                                <span>Delivery Fee:</span>
+                                <span class="savings-amount">₹40 → <strong>₹10</strong></span>
+                            </div>
+                            <div class="savings-item">
+                                <span>Night Charges:</span>
+                                <span class="savings-amount">₹30 → <strong>₹0</strong></span>
+                            </div>
+                            <div class="savings-item total">
+                                <span>You Save:</span>
+                                <span class="savings-amount total">₹<strong id="estimatedSave">60</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-buttons">
+                <button onclick="prevStep()" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button onclick="createPoolFinal()" class="btn-primary">
+                    <i class="fas fa-check"></i> Create Pool
+                </button>
+            </div>
+        </div>
+        
+        <!-- Success Message -->
+        <div id="successMessage" style="display: none; text-align: center; padding: 40px;">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Pool Created Successfully!</h2>
+            <p>Your pool is now active. People nearby can join it.</p>
+            <div style="margin: 30px 0;">
+                <p>Share this pool with friends:</p>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                    <button onclick="sharePoolWhatsApp()" class="btn-secondary">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button onclick="copyPoolLink()" class="btn-secondary">
+                        <i class="fas fa-link"></i> Copy Link
+                    </button>
+                </div>
+            </div>
+            <div style="margin-top: 30px;">
+                <a href="dashboard.html" class="btn-primary">
+                    <i class="fas fa-home"></i> Go to Dashboard
+                </a>
+                <a href="#" class="btn-secondary" id="viewPoolBtn" onclick="viewCreatedPool()">
+                    <i class="fas fa-eye"></i> View Pool
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Pool creation variables
+        let currentStep = 1;
+        let selectedPlatform = null;
+        let items = [];
+        let createdPoolId = null;
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Create Pool page loaded");
+            
+            // Check if user is logged in
+            const user = localStorage.getItem('poolify_user');
+            if (!user) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Show user email
+            const userData = JSON.parse(user);
+            document.getElementById('userEmail').textContent = userData.email;
+            
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const platform = urlParams.get('platform');
+            
+            if (platform && ['blinkit', 'zepto', 'instamart', 'flipkart'].includes(platform)) {
+                selectPlatform(platform);
+            }
+            
+            // Set default location from user data
+            document.getElementById('location').value = userData.hostel || 'Hostel B';
+            
+            // Load step 1
+            showStep(1);
+        });
+        
+        // Step Navigation
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Update progress steps
+            document.querySelectorAll('.progress-steps .step').forEach((el, index) => {
+                if (index + 1 <= step) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            
+            // Show current step
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+        }
+        
+        function nextStep() {
+            if (currentStep === 1 && !selectedPlatform) {
+                alert('Please select a platform');
+                return;
+            }
+            
+            if (currentStep === 2 && items.length === 0) {
+                alert('Please add at least one item');
+                return;
+            }
+            
+            if (currentStep === 4) {
+                // Update review before showing
+                updateReview();
+            }
+            
+            showStep(currentStep + 1);
+        }
+        
+        function prevStep() {
+            showStep(currentStep - 1);
+        }
+        
+        // Platform Selection
+        function selectPlatform(platform) {
+            selectedPlatform = platform;
+            
+            // Update UI
+            document.querySelectorAll('.platform-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            event.currentTarget.classList.add('selected');
+            document.getElementById('nextBtn1').disabled = false;
+        }
+        
+        // Item Management
+        function addItem() {
+            const input = document.getElementById('itemInput');
+            const item = input.value.trim();
+            
+            if (item) {
+                items.push(item);
+                input.value = '';
+                updateItemsList();
+                updateNextButton();
+            }
+        }
+        
+        function addQuickItem(item) {
+            items.push(item);
+            updateItemsList();
+            updateNextButton();
+        }
+        
+        function handleItemKeyPress(event) {
+            if (event.key === 'Enter') {
+                addItem();
+                event.preventDefault();
+            }
+        }
+        
+        function removeItem(index) {
+            items.splice(index, 1);
+            updateItemsList();
+            updateNextButton();
+        }
+        
+        function updateItemsList() {
+            const itemsList = document.getElementById('itemsList');
+            
+            if (items.length === 0) {
+                itemsList.innerHTML = `
+                    <p style="text-align: center; color: var(--gray); padding: 40px;">
+                        No items added yet. Start typing above or click quick suggestions.
+                    </p>
+                `;
+                return;
+            }
+            
+            itemsList.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600;">
+                    <span>Item</span>
+                    <span>Action</span>
+                </div>
+            `;
+            
+            items.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item-row';
+                itemElement.innerHTML = `
+                    <span>${item}</span>
+                    <button onclick="removeItem(${index})" class="remove-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                itemsList.appendChild(itemElement);
+            });
+        }
+        
+        function updateNextButton() {
+            document.getElementById('nextBtn2').disabled = items.length === 0;
+        }
+        
+        // Update Review Step
+        function updateReview() {
+            // Platform
+            const platformNames = {
+                blinkit: 'Blinkit',
+                zepto: 'Zepto',
+                instamart: 'Instamart',
+                flipkart: 'Flipkart Minutes'
+            };
+            
+            const platformIcons = {
+                blinkit: '<i class="fas fa-bolt"></i>',
+                zepto: '<i class="fas fa-rocket"></i>',
+                instamart: '<i class="fas fa-shopping-cart"></i>',
+                flipkart: '<i class="fab fa-flipkart"></i>'
+            };
+            
+            if (selectedPlatform) {
+                document.getElementById('reviewPlatformName').textContent = platformNames[selectedPlatform];
+                document.getElementById('reviewPlatformIcon').innerHTML = platformIcons[selectedPlatform];
+            }
+            
+            // Items
+            const itemsList = document.getElementById('reviewItems');
+            itemsList.innerHTML = items.map(item => 
+                `<div class="item-tag">${item}</div>`
+            ).join('');
+            
+            // Settings
+            document.getElementById('reviewTimeLimit').textContent = 
+                document.getElementById('timeLimit').value + ' minutes';
+            
+            document.getElementById('reviewMaxUsers').textContent = 
+                document.getElementById('maxUsers').value + ' users';
+            
+            const location = document.getElementById('location').value;
+            document.getElementById('reviewLocation').textContent = location || 'Not set';
+            
+            // Notes
+            const notes = document.getElementById('notes').value;
+            if (notes.trim()) {
+                document.getElementById('notesSection').style.display = 'block';
+                document.getElementById('reviewNotes').textContent = notes;
+            } else {
+                document.getElementById('notesSection').style.display = 'none';
+            }
+            
+            // Calculate estimated savings
+            const maxUsers = parseInt(document.getElementById('maxUsers').value);
+            const estimatedSave = maxUsers * 30; // ₹30 saved per user
+            document.getElementById('estimatedSave').textContent = estimatedSave;
+        }
+        
+        // Create Pool Final
+        function createPoolFinal() {
+            const user = JSON.parse(localStorage.getItem('poolify_user'));
+            if (!user) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Get all values
+            const timeLimit = parseInt(document.getElementById('timeLimit').value);
+            const maxUsers = parseInt(document.getElementById('maxUsers').value);
+            const notes = document.getElementById('notes').value.trim();
+            const location = document.getElementById('location').value.trim();
+            
+            // Calculate expiration time
+            const expiresAt = new Date();
+            expiresAt.setMinutes(expiresAt.getMinutes() + timeLimit);
+            
+            // Create pool object
+            const poolData = {
+                platform: selectedPlatform,
+                items: items,
+                timeLimit: timeLimit,
+                maxUsers: maxUsers,
+                joinedUsers: [user.uid || 'demo-user'], // Creator automatically joins
+                createdBy: user.uid || 'demo-user',
+                creatorName: user.name || user.email.split('@')[0],
+                creatorHostel: user.hostel || 'Unknown',
+                notes: notes,
+                location: location || user.hostel || 'Unknown',
+                status: 'active',
+                estimatedSave: maxUsers * 30,
+                createdAt: new Date().toISOString(),
+                expiresAt: expiresAt.toISOString()
+            };
+            
+            // Show loading
+            const createBtn = document.querySelector('#step4 .btn-primary');
+            const originalText = createBtn.innerHTML;
+            createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            createBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Generate pool ID
+                createdPoolId = 'pool-' + Date.now();
+                
+                // Save to localStorage for demo
+                let pools = JSON.parse(localStorage.getItem('poolify_pools') || '[]');
+                poolData.id = createdPoolId;
+                pools.push(poolData);
+                localStorage.setItem('poolify_pools', JSON.stringify(pools));
+                
+                // Update user stats
+                let userStats = JSON.parse(localStorage.getItem('poolify_user_stats') || '{"poolsCreated": 0}');
+                userStats.poolsCreated = (userStats.poolsCreated || 0) + 1;
+                localStorage.setItem('poolify_user_stats', JSON.stringify(userStats));
+                
+                // Show success message
+                document.getElementById('step4').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Update dashboard count
+                if (window.parent && window.parent.updateStats) {
+                    window.parent.updateStats();
+                }
+            }, 2000);
+        }
+        
+        // Share functions
+        function sharePoolWhatsApp() {
+            if (!selectedPlatform) return;
+            
+            const text = `Join my ${selectedPlatform} pool on Poolify! We can save on delivery together. https://poolify.com/join`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+        
+        function copyPoolLink() {
+            navigator.clipboard.writeText('https://poolify.com/join/' + (createdPoolId || 'demo'))
+                .then(() => alert('Link copied to clipboard!'))
+                .catch(() => alert('Failed to copy link'));
+        }
+        
+        function viewCreatedPool() {
+            alert(`Pool created successfully!\n\nPlatform: ${selectedPlatform}\nItems: ${items.join(', ')}\n\nYour pool is now active and visible to others.`);
+        }
+        
+        // Global functions
+        window.selectPlatform = selectPlatform;
+        window.nextStep = nextStep;
+        window.prevStep = prevStep;
+        window.addItem = addItem;
+        window.addQuickItem = addQuickItem;
+        window.handleItemKeyPress = handleItemKeyPress;
+        window.removeItem = removeItem;
+        window.createPoolFinal = createPoolFinal;
+        window.sharePoolWhatsApp = sharePoolWhatsApp;
+        window.copyPoolLink = copyPoolLink;
+        window.viewCreatedPool = viewCreatedPool;
+    </script>
+</body>
+</html>

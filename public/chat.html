@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Poolify</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chat JS -->
+    <script src="../js/chat.js" defer></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-brand">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Pool</span>
+            </a>
+            <div class="nav-links">
+                <div class="pool-info-mini">
+                    <span class="pool-platform-mini blinkit">
+                        <i class="fas fa-bolt"></i>
+                        Blinkit Pool
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Chat -->
+    <div class="container" style="max-width: 800px; margin: 0 auto; padding: 0;">
+        <div class="chat-container" style="height: 100vh; border-radius: 0; box-shadow: none;">
+            <div class="chat-header" style="border-radius: 0;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="pool-avatar">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0;">Blinkit Pool Chat</h3>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">
+                            Created by Rahul • 3 members
+                        </p>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button onclick="showMembers()" class="btn-icon" title="Members">
+                        <i class="fas fa-users"></i>
+                    </button>
+                    <button onclick="showPoolDetails()" class="btn-icon" title="Pool Info">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="chatMessages" class="chat-messages">
+                <!-- Messages load here -->
+            </div>
+            
+            <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                    <div class="quick-actions">
+                        <button class="quick-action" data-action="join">
+                            <i class="fas fa-user-plus"></i> Joining!
+                        </button>
+                        <button class="quick-action" data-action="payment">
+                            <i class="fas fa-money-bill"></i> Payment?
+                        </button>
+                        <button class="quick-action" data-action="delivery">
+                            <i class="fas fa-truck"></i> Delivery?
+                        </button>
+                        <button class="quick-action" data-action="urgent">
+                            <i class="fas fa-clock"></i> Urgent!
+                        </button>
+                    </div>
+                    <textarea id="chatInput" class="chat-input" 
+                              placeholder="Type your message..." 
+                              rows="1"></textarea>
+                </div>
+                <button id="sendMessageBtn" class="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Members Modal -->
+    <div id="membersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pool Members</h2>
+                <button onclick="closeMembersModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="membersList">
+                    <!-- Members will load here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pool Details Modal -->
+    <div id="poolDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pool Details</h2>
+                <button onclick="closePoolDetailsModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="poolDetails">
+                    <!-- Pool details will load here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get pool ID from URL or use demo
+            const urlParams = new URLSearchParams(window.location.search);
+            const poolId = urlParams.get('id') || 'blinkit-pool-123';
+            
+            // Initialize chat
+            initChat(poolId);
+            
+            // Load pool members
+            loadPoolMembers();
+            
+            // Load pool details
+            loadPoolDetails();
+        });
+        
+        // Load pool members
+        function loadPoolMembers() {
+            const membersList = document.getElementById('membersList');
+            if (!membersList) return;
+            
+            const demoMembers = [
+                { name: 'Rahul', role: 'Creator', items: 4, online: true },
+                { name: 'Priya', role: 'Member', items: 2, online: true },
+                { name: 'Amit', role: 'Member', items: 3, online: false },
+                { name: 'You', role: 'Member', items: 1, online: true }
+            ];
+            
+            membersList.innerHTML = demoMembers.map(member => `
+                <div class="member-item" style="display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--light-gray);">
+                    <div class="member-avatar" style="position: relative;">
+                        <div style="width: 45px; height: 45px; background: ${member.online ? 'var(--primary)' : 'var(--gray)'}; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                            ${member.name.charAt(0)}
+                        </div>
+                        ${member.online ? 
+                            `<div style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: var(--success); border: 2px solid white; border-radius: 50%;"></div>` : 
+                            ''
+                        }
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>${member.name} ${member.name === 'You' ? '(You)' : ''}</strong>
+                            <span style="color: var(--gray); font-size: 0.9rem;">${member.role}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                            <span style="color: var(--gray); font-size: 0.9rem;">${member.items} items</span>
+                            <span style="color: ${member.online ? 'var(--success)' : 'var(--gray)'}; font-size: 0.9rem;">
+                                ${member.online ? 'Online' : 'Offline'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Load pool details
+        function loadPoolDetails() {
+            const poolDetails = document.getElementById('poolDetails');
+            if (!poolDetails) return;
+            
+            const demoDetails = {
+                platform: 'Blinkit',
+                status: 'Active',
+                expires: '15 minutes',
+                items: ['Milk', 'Bread', 'Eggs', 'Chips', 'Maggi', 'Cold Drink'],
+                totalItems: 6,
+                members: 4,
+                savings: '₹120',
+                location: 'Hostel B Gate'
+            };
+            
+            poolDetails.innerHTML = `
+                <div style="display: grid; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Platform:</span>
+                        <strong>${demoDetails.platform}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Status:</span>
+                        <strong style="color: var(--success);">${demoDetails.status}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Time Left:</span>
+                        <strong>${demoDetails.expires}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Members:</span>
+                        <strong>${demoDetails.members} users</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Total Savings:</span>
+                        <strong style="color: var(--success);">${demoDetails.savings}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Delivery:</span>
+                        <strong>${demoDetails.location}</strong>
+                    </div>
+                    <div>
+                        <p style="margin-bottom: 10px; color: var(--gray);">Items in pool:</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${demoDetails.items.map(item => 
+                                `<span style="background: var(--light); padding: 6px 12px; border-radius: 15px; font-size: 0.9rem;">${item}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Modal functions
+        function showMembers() {
+            document.getElementById('membersModal').style.display = 'block';
+        }
+        
+        function closeMembersModal() {
+            document.getElementById('membersModal').style.display = 'none';
+        }
+        
+        function showPoolDetails() {
+            document.getElementById('poolDetailsModal').style.display = 'block';
+        }
+        
+        function closePoolDetailsModal() {
+            document.getElementById('poolDetailsModal').style.display = 'none';
+        }
+        
+        // Close modals on outside click
+        window.onclick = function(event) {
+            const membersModal = document.getElementById('membersModal');
+            const poolDetailsModal = document.getElementById('poolDetailsModal');
+            
+            if (event.target === membersModal) {
+                closeMembersModal();
+            }
+            if (event.target === poolDetailsModal) {
+                closePoolDetailsModal();
+            }
+        };
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            cleanupChat();
+        });
+    </script>
+
+    <style>
+        .pool-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .pool-platform-mini {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .pool-platform-mini.blinkit {
+            background: rgba(248, 180, 0, 0.1);
+            color: #F8B400;
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .member-item:hover {
+            background: var(--light);
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .chat-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .chat-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</body>
+</html>
