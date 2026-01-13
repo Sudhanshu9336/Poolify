@@ -942,5 +942,21 @@
         window.location.href = './pool-details.html';  // Same folder
     };
 </script>
+<script>
+    // EMERGENCY FIX - Override viewPool function
+    window.viewPool = function(poolId) {
+        console.log("EMERGENCY: Opening pool details for", poolId);
+        localStorage.setItem('current_viewing_pool', poolId);
+        
+        // Try different approaches
+        try {
+            // Method 1: Direct navigation
+            window.location.href = 'pool-details.html';
+        } catch(e) {
+            // Method 2: Open in new tab
+            window.open('pool-details.html', '_blank');
+        }
+    };
+</script>
 </body>
 </html>
